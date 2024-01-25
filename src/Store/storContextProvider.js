@@ -4,13 +4,12 @@ import { useState } from "react";
 const StorContextProvider = props => {
     const [storeItems, setStoreItems] = useState([]);
     const [cartItems, setCartItems] = useState([]);
-    
+
     const addItemHandler = (item) => {
         const storeItemIndex = storeItems.findIndex(i => i.name == item.name);
         
         if(storeItemIndex !==-1) {
             const storeItem = storeItems[storeItemIndex];
-            console.log(storeItem, item)
             const newItem = {
                 ...storeItem,
                 lSize: (+storeItem.lSize)+(+item.lSize),
@@ -25,9 +24,16 @@ const StorContextProvider = props => {
         const newItems = [...storeItems, item];
         setStoreItems(newItems);
     }
+    const removeFromStore = (id) => {
+        console.log(id)
+        const newStoreItems = storeItems.filter(item => item.id == id);
+        console.log(newStoreItems)
+        setStoreItems(newStoreItems);   
+    }
 
     const addToCartHandler = (id, name) => {
         const item =storeItems.findIndex(item => item.id==id);
+
         let cartItem = cartItems.findIndex(item => item.id==id);
         let newCartItems, newCartItem, newStoreItems, cartItemCount, storeItemCount,
         newStoreItem = {
@@ -42,89 +48,39 @@ const StorContextProvider = props => {
                 mSize:0,
                 sSize:0
             }
-            if(name == "lSize"){
-                storeItemCount = newStoreItem.lSize;
-                newCartItem = {
-                    ...newCartItem,
-                    lSize:1
-                }
-                newStoreItem = {
-                    ...newStoreItem,
-                    lSize:storeItemCount-1
-                }
+           
+                storeItemCount = newStoreItem[name];
+                newCartItem[name]=1
+                newStoreItem = {...newStoreItem}
+                newStoreItem[name] = storeItemCount-1;
+                console.log(newStoreItem.lSize==newStoreItem.mSize==newStoreItem.sSize==0)
+                if(newStoreItem.lSize<= 0 && newStoreItem.mSize<= 0 && newStoreItem.sSize<= 0)removeFromStore(item)
+                
 
-            }
-            else if(name == "mSize"){
-                storeItemCount = newStoreItem.mSize;
-                newCartItem = {
-                    ...newCartItem,
-                    mSize:1
-                }
-                newStoreItem = {
-                    ...newStoreItem,
-                    lSize:storeItemCount-1
-                }
-
-            }
-            else{
-                storeItemCount = newStoreItem.sSize;
-                newCartItem = {
-                    ...newCartItem,
-                    sSize:1
-                }
-                newStoreItem = {
-                    ...newStoreItem,
-                    lSize:storeItemCount-1
-                }
-
-            }
         }
       else {
-         if(name == "lSize"){
-            storeItemCount = newStoreItem.lSize;
-            cartItemCount = cartItems[cartItem].lSize
-            newCartItem = {
-                ...cartItems[cartItem],
-                lSize:cartItemCount+1
-            }
-            newStoreItem = {
-                ...newStoreItem,
-                lSize:storeItemCount-1
-            }
+            storeItemCount = newStoreItem[name];
+            cartItemCount = cartItems[cartItem][name]
+
+            newCartItem = {...cartItems[cartItem]}
+            newCartItem[name] = cartItemCount+1;
+            
+            newStoreItem[name] = storeItemCount-1
+        
+            if(newStoreItem.lSize<= 0 && newStoreItem.mSize<= 0 && newStoreItem.sSize<= 0) {
+               return removeFromStore(item)  
+            }  
+         
         }
-        else if(name == "mSize"){
-            storeItemCount = newStoreItem.mSize;
-            cartItemCount = cartItems[cartItem].mSize
-            newCartItem = {
-                ...cartItems[cartItem],
-                mSize:cartItemCount+1
-            }
-            newStoreItem = {
-                ...newStoreItem,
-                mSize:storeItemCount-1
-            }
-        }
-        else{
-            storeItemCount = newStoreItem.sSize;
-            cartItemCount = cartItems[cartItem].sSize
-            newCartItem = {
-                ...cartItems[cartItem],
-                sSize:cartItemCount+1
-            }
-            newStoreItem = {
-                ...newStoreItem,
-                sSize:storeItemCount-1
-            }
-        }
-        }
+
+        
             newCartItems = [...cartItems];
             newCartItems[cartItem] = newCartItem;
             newStoreItems = [...storeItems]
-            newStoreItems[item] = newStoreItem
+            newStoreItems[item] = newStoreItem;
 
-            console.log(newStoreItem)
           setCartItems(newCartItems) 
-          setStoreItems(newStoreItems)        
+          setStoreItems(newStoreItems)    
     }
 
     const storeContext = {
